@@ -392,7 +392,7 @@ async fn run_command(cli: Cli) {
                 Some(failure_text),
                 cookies,
             )
-            .await;
+                .await;
         }
         Commands::XssScan {
             target,
@@ -418,7 +418,7 @@ async fn run_command(cli: Cli) {
                 output,
                 output_file,
             )
-            .await;
+                .await;
         }
         Commands::SqliScan {
             target,
@@ -464,7 +464,7 @@ async fn run_command(cli: Cli) {
                 cookies,
                 max_endpoints,
             )
-            .await;
+                .await;
         }
     }
 }
@@ -650,7 +650,7 @@ async fn handle_xss_scan(
 
                     if let Some(path) = output_file {
                         let text = format!("XSS Scan Results\nTarget: {}\nVulnerabilities: {}\n",
-                            results.target, results.vulnerabilities.len());
+                                           results.target, results.vulnerabilities.len());
                         std::fs::write(&path, text).unwrap();
                         println!("\n✓ Results also saved to: {}", path.display());
                     }
@@ -788,11 +788,11 @@ async fn handle_sqli_scan(
             println!("  OOB Host: {}", config.oob_host.as_ref().unwrap_or(&"<not set>".to_string()));
         }
         println!("  Payload Source: {}",
-            if config.payload_file.is_some() {
-                config.payload_file.as_ref().unwrap().display().to_string()
-            } else {
-                "placeholders (no real testing)".to_string()
-            }
+                 if config.payload_file.is_some() {
+                     config.payload_file.as_ref().unwrap().display().to_string()
+                 } else {
+                     "placeholders (no real testing)".to_string()
+                 }
         );
         println!("\n✅ Dry run complete. Configuration is valid.");
         println!("   Ready for authorized scan (remove --dry-run flag).");
